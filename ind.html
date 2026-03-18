@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Study Buddy AI</title>
+</head>
+<body style="font-family: Arial; text-align: center; margin-top: 50px;">
+
+<h2>🤖 Study Buddy Companion</h2>
+
+<input id="input" placeholder="Type or speak..." style="padding:10px; width:250px;" />
+<br><br>
+
+<button onclick="sendMessage()">Send 💬</button>
+<button onclick="startVoice()">🎤 Speak</button>
+<button onclick="testVoice()">🔊 Test Voice</button>
+
+<p id="response" style="margin-top:20px; font-size:18px;"></p>
+
+<script>
+
+const API_KEY = "AIzaSyA_OU30DHnTSOjktPdI2D_bcRsa-HVJ6VU"; // PUT YOUR KEY
+
+async function sendMessage() {
+  let msg = document.getElementById("input").value;
+
+  if(!msg){
+    alert("Enter message!");
+    return;
+  }
+
+  try {
+    let res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY
+    ), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: msg }]
+        }]
+      })
+    });
+
+    let text = await res.text();
+    let data = JSON.parse(text);
+
+    let reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if(!reply){
+      reply = "Still no response 😢 (Check API key)";
+    }
+
+    document.getElementById("response").innerText = reply;
+
+    speak(reply);
+
+  } catch (error) {
+    document.getElementById("response").innerText = "Error: " + error;
+  }
+}
+
+// 🔊 Voice Output
+function speak(text){
+  window.speechSynthesis.cancel();
+  let speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "en-US";
+  speechSynthesis.speak(speech);
+}
+
+// 🎤 Voice Input
+function startVoice(){
+  const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+  recognition.start();
+
+  recognition.onresult = function(event){
+    let text = event.results[0][0].transcript;
+    document.getElementById("input").value = text;
+    sendMessage();
+  };
+}
+
+// 🔊 Test
+function testVoice(){
+  speak("Hello! I am your study buddy.");
+}
+
+</script>
+
+</body>
+</html>
