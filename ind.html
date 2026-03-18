@@ -7,20 +7,24 @@
 
 <h2>🤖 Study Buddy Companion</h2>
 
-<input id="input" placeholder="Type or speak..." style="padding:10px; width:250px;" />
+<input id="input" placeholder="Ask something..." style="padding:10px; width:250px;" />
 <br><br>
 
-<button onclick="sendMessage()">Send 💬</button>
+<button onclick="send()">Send 💬</button>
 <button onclick="startVoice()">🎤 Speak</button>
 
 <p id="response" style="margin-top:20px; font-size:18px;"></p>
 
 <script>
 
-async function sendMessage() {
+// 🔥 YOUR RENDER BACKEND
+const URL = "https://google-ai-study-bot.onrender.com/chat";
+
+// 💬 Send Message
+async function send(){
   let msg = document.getElementById("input").value;
 
-  let res = await fetch("https://YOUR-RENDER-URL/chat", {
+  let res = await fetch(URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -37,7 +41,6 @@ async function sendMessage() {
 
 // 🔊 Voice Output
 function speak(text){
-  window.speechSynthesis.cancel();
   let speech = new SpeechSynthesisUtterance(text);
   speech.lang = "en-US";
   speechSynthesis.speak(speech);
@@ -51,7 +54,7 @@ function startVoice(){
   recognition.onresult = function(event){
     let text = event.results[0][0].transcript;
     document.getElementById("input").value = text;
-    sendMessage();
+    send();
   };
 }
 
