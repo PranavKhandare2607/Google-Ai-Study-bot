@@ -5,7 +5,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = "YOUR_GEMINI_API_KEY";
+const API_KEY = process.env.API_KEY;
 
 app.post("/chat", async (req, res) => {
   const msg = req.body.message;
@@ -26,13 +26,15 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const reply =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
 
     res.json({ reply });
 
   } catch (error) {
+    console.log(error);
     res.json({ reply: "Error connecting AI" });
   }
 });
 
-app.listen(3000, () => console.log("Server running"));
+app.listen(3000, () => console.log("Server running on port 3000"));

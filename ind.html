@@ -12,53 +12,27 @@
 
 <button onclick="sendMessage()">Send 💬</button>
 <button onclick="startVoice()">🎤 Speak</button>
-<button onclick="testVoice()">🔊 Test Voice</button>
 
 <p id="response" style="margin-top:20px; font-size:18px;"></p>
 
 <script>
 
-const API_KEY = "AIzaSyA_OU30DHnTSOjktPdI2D_bcRsa-HVJ6VU"; // PUT YOUR KEY
-
 async function sendMessage() {
   let msg = document.getElementById("input").value;
 
-  if(!msg){
-    alert("Enter message!");
-    return;
-  }
+  let res = await fetch("https://YOUR-RENDER-URL/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ message: msg })
+  });
 
-  try {
-    let res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY
-    ), {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: msg }]
-        }]
-      })
-    });
+  let data = await res.json();
 
-    let text = await res.text();
-    let data = JSON.parse(text);
+  document.getElementById("response").innerText = data.reply;
 
-    let reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if(!reply){
-      reply = "Still no response 😢 (Check API key)";
-    }
-
-    document.getElementById("response").innerText = reply;
-
-    speak(reply);
-
-  } catch (error) {
-    document.getElementById("response").innerText = "Error: " + error;
-  }
+  speak(data.reply);
 }
 
 // 🔊 Voice Output
@@ -79,11 +53,6 @@ function startVoice(){
     document.getElementById("input").value = text;
     sendMessage();
   };
-}
-
-// 🔊 Test
-function testVoice(){
-  speak("Hello! I am your study buddy.");
 }
 
 </script>
